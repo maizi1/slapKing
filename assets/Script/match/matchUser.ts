@@ -19,19 +19,16 @@ export default class MatchUser extends cc.Component {
     count: number = 0;
     maxNumber: number = 37;
     diffNumber: number;
-    callback: (name: string) => void;
     isSucceed: boolean;
     duration: number;
-    key: string;
+    user: { name: string; duration: number; isEnd: boolean };
 
-    init(name: string, key: string, callback: (key: string) => void) {
+    init(user: { name: string; duration: number; isEnd: boolean }) {
         //this.node 有3个子节点， 第一个起依次是当前耳光次数、名字、头像Sprite Frame
         const { children } = this.node;
-        this.name = name;
-        this.key = key;
-        this.callback = callback;
+        this.user = user;
         this.isSucceed = Math.random() < 0.5;
-        this.duration = Math.random() * 4 + 4;
+        user.duration = Math.random() * 4 + 4;
         this.diffNumber = this.isSucceed
             ? 0
             : Math.random() < 0.5
@@ -43,14 +40,17 @@ export default class MatchUser extends cc.Component {
     }
 
     onGo() {
-        const repeat = this.maxNumber - this.diffNumber
-        console.log(this.maxNumber, this.diffNumber)
-        this.schedule(() => {
-            this.numberLabel.string = ++this.count + '';
-            if (this.count === repeat) {
-                this.callback(this.key)
-            }
-        }, this.duration / repeat, repeat - 1);
+        const repeat = this.maxNumber - this.diffNumber;
+        this.schedule(
+            () => {
+                this.numberLabel.string = ++this.count + '';
+                if (this.count === repeat) {
+                    this.user.isEnd = true;
+                }
+            },
+            this.user.duration / repeat,
+            repeat - 1
+        );
     }
 
     // start () {

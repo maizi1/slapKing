@@ -30,6 +30,21 @@ export default class Match extends cc.Component {
     bottomBtnNode: cc.Node = null; // 此节点拥有两个子节点， 第一个是打耳光按钮， 第二个是提交
     bottomButtons: [cc.Button, cc.Button]; // [打耳光按钮组件， 提交按钮组件]
 
+    @property(cc.Node)
+    outNode: cc.Node = null;
+    onOut: () => void;
+
+    @property(cc.Node)
+    succeedNode: cc.Node = null;
+    onSucceed: (time: number) => void;
+
+    @property(cc.Label)
+    countLabel: cc.Label = null;
+
+    @property(cc.Label)
+    timeLabel: cc.Label = null;
+    time: number = 30;
+
     isStart: true;
     gameState = {
         currenUser: new UserStare('孙悟空'),
@@ -43,15 +58,20 @@ export default class Match extends cc.Component {
     onLoad() {
         const { gameState } = this;
         const { children } = this.bottomBtnNode;
+        gameState.setState = gameState.setState.bind(gameState);
+
         this.bottomButtons = [
             children[0].getComponent(cc.Button),
             children[1].getComponent(cc.Button),
         ];
         this.slap = this.slapNode.getComponent('slap');
+        this.slap.init(37);
+
+        this.onOut = this.outNode.getComponent('out').onOut;
+        this.onSucceed = this.succeedNode.getComponent('succeed').onSucceed;
+
         this.matchUser1 = this.matchUser1Node.getComponent('matchUser');
         this.matchUser2 = this.matchUser2Node.getComponent('matchUser');
-        this.slap.init(37);
-        gameState.setState = gameState.setState.bind(gameState);
         this.matchUser1.init(gameState.matchUser1.name, 'matchUser1', gameState.setState);
         this.matchUser2.init(gameState.matchUser1.name, 'matchUser2', gameState.setState);
 
@@ -60,9 +80,24 @@ export default class Match extends cc.Component {
 
     start() {}
 
+    getIsEnd() {
+        const { gameState } = this;
+        for (let key in gameState) {
+            if (!gameState[key].isEnd) {
+                return false
+            }
+        }
+
+        return true
+    }
+
     onSlap() {
-        
-        this.slap.onSlap();
+        const count = this.slap.onSlap();
+        this.countLabel.string = count + '';
+        if (count === 37) {
+            this.onSucceed(30 - this.time);
+            this.gameState.currenUser
+        }
     }
     // update (dt) {}
     playReady() {
@@ -86,12 +121,17 @@ export default class Match extends cc.Component {
         this.scheduleOnce(() => {
             const { bottomButtons } = this;
             cc.audioEngine.play(this.readyAudio, false, 1);
-            console.log(bottomButtons[0])
-            console.log(bottomButtons[0].interactable)
 
             bottomButtons[0].interactable = true;
             bottomButtons[1].interactable = true;
 
+            this.schedule(
+                () => {
+                    this.timeLabel.string = '' + --this.time;
+                },
+                1,
+                29
+            );
             this.matchUser1.onGo();
             this.matchUser2.onGo();
         }, 1.2);
