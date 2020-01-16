@@ -12,10 +12,6 @@ const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class NewClass extends cc.Component {
-    @property(cc.AudioClip)
-    whistleAudio: cc.AudioClip = null;
-    @property(cc.AudioClip)
-    outAudio: cc.AudioClip = null;
 
     background: cc.Node;
     referee: cc.Node;
@@ -42,9 +38,9 @@ export default class NewClass extends cc.Component {
             .delay(1.6)
             .by(0.4, { position: cc.v2(-380, 0) }, { easing: 'sineInOut' })
             .start();
-        cc.audioEngine.playEffect(this.whistleAudio, false);
+        window.Global.play('whistle');
         this.scheduleOnce(() => {
-            cc.audioEngine.playEffect(this.outAudio, false);
+            window.Global.play('out');
         }, 0.8);
     }
 }

@@ -19,9 +19,6 @@ export default class Slap extends cc.Component {
     @property(cc.Node)
     fron: cc.Node = null;
 
-    @property(cc.AudioClip)
-    audio: cc.AudioClip = null;
-
     isleftOrRight: boolean = false;
     isStart: boolean = false;
     isPlayAudio: boolean;
@@ -53,7 +50,7 @@ export default class Slap extends cc.Component {
             left.active = !isleftOrRight;
             right.active = isleftOrRight;
             if (isPlayAudio) {
-                cc.audioEngine.play(this.audio, false, 1);
+                window.Global.play('slap');
             }
 
             this.isleftOrRight = !isleftOrRight;

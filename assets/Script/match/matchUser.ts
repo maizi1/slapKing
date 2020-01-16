@@ -14,29 +14,32 @@ const { ccclass, property } = cc._decorator;
 export default class MatchUser extends cc.Component {
     numberLabel: cc.Label = null;
     nameLabel: cc.Label = null;
+    iconSprite: cc.Sprite = null;
 
     name: string = '';
     count: number = 0;
     maxNumber: number = 37;
     diffNumber: number;
-    isSucceed: boolean;
     duration: number;
-    user: { name: string; duration: number; isEnd: boolean };
-
-    init(user: { name: string; duration: number; isEnd: boolean }) {
+    user: { name: string; duration: number; isEnd: boolean; isSucceed: boolean };
+    callback: () => void;
+    init(user: { name: string; duration: number; isEnd: boolean; isSucceed: boolean, icon: cc.SpriteFrame }, callback) {
         //this.node 有3个子节点， 第一个起依次是当前耳光次数、名字、头像Sprite Frame
         const { children } = this.node;
         this.user = user;
-        this.isSucceed = Math.random() < 0.5;
-        user.duration = Math.random() * 4 + 4;
-        this.diffNumber = this.isSucceed
+        user.isSucceed = Math.random() < 0.5;
+        user.duration = Math.floor(Math.random() * 4 + 4);
+        this.diffNumber = user.isSucceed
             ? 0
             : Math.random() < 0.5
             ? Math.floor(Math.random() * 5)
             : -1;
         this.numberLabel = children[0].getComponent(cc.Label);
         this.nameLabel = children[1].getComponent(cc.Label);
-        this.nameLabel.string = name;
+        this.iconSprite = children[2].children[0].getComponent(cc.Sprite);
+        this.nameLabel.string = user.name;
+        this.iconSprite.spriteFrame = user.icon;
+        this.callback = callback;
     }
 
     onGo() {
@@ -46,6 +49,7 @@ export default class MatchUser extends cc.Component {
                 this.numberLabel.string = ++this.count + '';
                 if (this.count === repeat) {
                     this.user.isEnd = true;
+                    this.callback();
                 }
             },
             this.user.duration / repeat,
